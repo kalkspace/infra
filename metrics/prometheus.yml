@@ -5,7 +5,7 @@ scrape_configs:
 
     basic_auth:
       username: "metrics"
-      password: "de7P6JA5zMgcA6S9fiMa"
+      password: "<redacted>"
 
     static_configs:
       - targets: ["bbb.kalk.space"]
