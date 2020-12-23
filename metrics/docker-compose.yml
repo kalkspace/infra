@@ -1,32 +1,32 @@
-version: '3.0'
+version: "3.0"
 services:
   prometheus:
     image: prom/prometheus
     ports:
-    - "9090:9090"
+      - "9090:9090"
     volumes:
-    - "./prometheus.yml:/etc/prometheus/prometheus.yml"
-    - "prometheus_data:/data"
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "prometheus_data:/data"
 
   blackbox:
     image: prom/blackbox-exporter:master
     ports:
-    - "9115:9115"
+      - "9115:9115"
     volumes:
-    - "./blackbox.yml:/config/blackbox.yml"
+      - "./blackbox.yml:/config/blackbox.yml"
     command:
       - "--config.file=/config/blackbox.yml"
 
   grafana:
     image: grafana/grafana
     volumes:
-    - "grafana_data:/var/lib/grafana"
+      - "grafana_data:/var/lib/grafana"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`metrics.kalk.space`)"
       - "traefik.http.routers.grafana.entrypoints=websecure"
       - "traefik.http.routers.grafana.tls.certresolver=myresolver"
-  
+
   traefik:
     image: traefik
     command:
