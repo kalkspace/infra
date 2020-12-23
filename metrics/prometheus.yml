@@ -1,0 +1,43 @@
+scrape_configs:
+- job_name: bigbluebutton
+  metrics_path: /metrics/
+  scheme: https
+
+  basic_auth:
+    username: 'metrics'
+    password: 'de7P6JA5zMgcA6S9fiMa'
+
+  static_configs:
+  - targets: ['bbb.kalk.space']
+
+- job_name: 'blackbox_icmp'
+  metrics_path: /probe
+  params:
+    module: [icmp]
+    
+  static_configs:
+    - targets:
+      - gw1.kalk.space
+  relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: blackbox:9115  # The blackbox exporter's real hostname:port.
+
+- job_name: 'blackbox_http'
+  metrics_path: /probe
+  params:
+    module: [http_2xx_ip4]
+    
+  static_configs:
+    - targets:
+      - https://discuss.kalk.space/srv/status
+  relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: blackbox:9115  # The blackbox exporter's real hostname:port.
