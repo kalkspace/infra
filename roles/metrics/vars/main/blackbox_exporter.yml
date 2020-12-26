@@ -1,0 +1,52 @@
+blackbox_exporter_port: "9115"
+
+blackbox_exporter_config:
+  modules:
+    http_2xx_ip4:
+      prober: http
+      http:
+        preferred_ip_protocol: ip4
+      timeout: 5s
+
+    icmp:
+      prober: icmp
+      icmp: {}
+      timeout: 5s
+
+blackbox_exporter:
+  service:
+    image: prom/blackbox-exporter:master
+    volumes:
+      - "{{ config_dir }}/blackbox_exporter.yml:/config.yml"
+    command:
+      - "--config.file=/config.yml"
+
+  files:
+    - dest: "{{ config_dir }}/blackbox_exporter.yml"
+      content: "{{ blackbox_exporter_config | to_yaml }}"
+
+  jobs:
+    - job_name: "blackbox_icmp"
+      metrics_path: /probe
+      params:
+        module: [icmp]
+      static_configs:
+        - targets: "{{ scrape_targets.blackbox_icmp }}"
+      relabel_configs: "{{ blackbox_exporter_relabel }}"
+
+    - job_name: "blackbox_http"
+      metrics_path: /probe
+      params:
+        module: [http_2xx_ip4]
+      static_configs:
+        - targets: "{{ scrape_targets.blackbox_http }}"
+      relabel_configs: "{{ blackbox_exporter_relabel }}"
+
+blackbox_exporter_relabel:
+  - source_labels: [__address__]
+    target_label: __param_target
+  - source_labels: [__param_target]
+    target_label: instance
+  - target_label: __address__
+    # The blackbox exporter's real hostname:port.
+    replacement: "blackbox_exporter:{{ blackbox_exporter_port }}"

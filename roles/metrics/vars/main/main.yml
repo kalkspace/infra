@@ -1,0 +1,28 @@
+config_dir: "/var/services/config"
+
+services:
+  - traefik
+  - prometheus
+  - grafana
+  - blackbox_exporter
+  - unms_exporter
+
+scrape_targets:
+  bbb:
+    - bbb.kalk.space
+  blackbox_icmp:
+    - gw1.kalk.space
+  blackbox_http:
+    - https://discuss.kalk.space/srv/status
+  unms:
+    - kalkspace.unmsapp.com
+
+prometheus_jobs_extra:
+  - job_name: bigbluebutton
+    scheme: https
+    metrics_path: /metrics/
+    basic_auth:
+      username: "metrics"
+      password: "<TODO>"
+    static_configs:
+      - targets: "{{ scrape_targets.bbb }}"

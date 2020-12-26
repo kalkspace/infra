@@ -1,0 +1,5 @@
+- name: Configure metrics services
+  hosts:
+    - metrics
+  roles:
+    - metrics

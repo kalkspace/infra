@@ -1,0 +1,13 @@
+grafana:
+  service:
+    image: grafana/grafana
+    volumes:
+      - "grafana_data:/var/lib/grafana"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`metrics.kalk.space`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls.certresolver=myresolver"
+
+  volumes:
+    grafana_data: {}
