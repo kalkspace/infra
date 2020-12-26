@@ -1,4 +1,6 @@
 - name: Configure metrics services
+  vars_files:
+    - vault/secrets.yml
   hosts:
     - metrics
   roles:

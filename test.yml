@@ -31,5 +31,7 @@
         ansible_connection: community.docker.docker
 
 - hosts: docker_test
+  vars_files:
+    - vault/test-dummies.yml
   roles:
     - metrics
