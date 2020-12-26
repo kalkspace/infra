@@ -1,4 +1,4 @@
-unms_exporter_host: "unms-exporter:9806"
+unms_exporter_host: "unms_exporter:9806"
 
 unms_exporter_token: !vault |
   $ANSIBLE_VAULT;1.1;AES256
