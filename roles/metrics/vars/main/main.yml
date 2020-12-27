@@ -1,5 +1,7 @@
 config_dir: "/var/services"
 
+base_domain: "metrics.kalk.space"
+
 services:
   - traefik
   - prometheus
