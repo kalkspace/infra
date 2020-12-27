@@ -3,6 +3,7 @@
   gather_facts: false
   vars:
     container_name: "ansible-test-{{ '' | to_uuid }}"
+    recreate_test_env: false
   tasks:
     - name: Build test container
       community.docker.docker_image:
@@ -10,7 +11,7 @@
           path: ./test-env
         name: kalkspace-infra-test-env
         source: build
-        # needed to get the image id
+        # needed to get the image id, will use cache
         force_source: true
       register: test_env
 
@@ -20,7 +21,7 @@
         image: "{{ test_env.image.Id }}"
         command: ["sleep", "infinity"]
         detach: true
-        recreate: true
+        recreate: "{{ recreate_test_env }}"
         force_kill: true
         container_default_behavior: "no_defaults"
 
@@ -29,9 +30,13 @@
         name: "{{ container_name }}"
         groups: docker_test
         ansible_connection: community.docker.docker
+        ansible_python_interpreter: /usr/bin/python3
+      changed_when: false
 
 - hosts: docker_test
   vars_files:
     - vault/test-dummies.yml
+  vars:
+    skip_handlers: true
   roles:
     - metrics
