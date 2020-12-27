@@ -37,7 +37,8 @@
       {{
         [{
           'path': config_dir+'/files/'+(item.1.content | hash('sha1')),
-          'content': item.1.content
+          'content': item.1.content,
+          'label': item.0.name+' - '+item.1.dest,
         }] | union(service_files | default([]))
       }}
   with_subelements:
@@ -53,7 +54,7 @@
       {{ ansible_managed | comment }}
       {{ item.content }}
   loop: "{{ service_files }}"
-  loop_control: { label: "{{ item.path | basename }}" }
+  loop_control: { label: "{{ item.label }}" }
 
 - name: Cleanup old files
   block:
