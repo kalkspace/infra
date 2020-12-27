@@ -13,34 +13,80 @@
       - docker
       - docker-compose
 
-- name: Create config dir
+- name: Create config dirs
   file:
-    path: "{{ config_dir }}"
+    path: "{{ item }}"
     state: directory
+  loop:
+    - "{{ config_dir }}"
+    - "{{ config_dir }}/files"
+
+- name: Prepare files for writing & mounting
+  set_fact:
+    service_mounts: |
+      {{
+        {
+          item.0.name: [{
+            'type': 'bind',
+            'source': config_dir+'/files/'+(item.1.content | hash('sha1')),
+            'target': item.1.dest
+          }]
+        } | combine(service_mounts | default({}))
+      }}
+    service_files: |
+      {{
+        [{
+          'path': config_dir+'/files/'+(item.1.content | hash('sha1')),
+          'content': item.1.content
+        }] | union(service_files | default([]))
+      }}
+  with_subelements:
+    - "{{ service_specs | selectattr('files', 'defined') }}"
+    - files
+  loop_control:
+    label: "{{ item.0.name }} - {{ item.1.dest }}"
 
 - name: Write files for services
   copy:
-    dest: "{{ item.dest }}"
+    dest: "{{ item.path }}"
     content: |
       {{ ansible_managed | comment }}
       {{ item.content }}
-  loop: "{{ lookup('vars', *services) | selectattr('files', 'defined') | map(attribute='files') | flatten(levels=1) }}"
-  loop_control:
-    label: "{{ item.dest }}"
-  notify: "Restart services"
+  loop: "{{ service_files }}"
+  loop_control: { label: "{{ item.path | basename }}" }
+
+- name: Cleanup old files
+  block:
+    - name: Find files
+      find:
+        paths: "{{ config_dir }}/files/"
+      register: files_to_delete
+    - name: Delete outdated files
+      file:
+        state: absent
+        path: "{{ item }}"
+      loop: "{{ files_to_delete.files | map(attribute='path') | difference((service_files | map(attribute='path'))) }}"
+      loop_control: { label: "{{ item | basename }}" }
 
 - name: Gather docker compose spec
   set_fact:
-    service_defs: "{{ { item.1: item.0.service } | combine(service_defs | default({})) }}"
-    volume_defs: "{{ item.0.volumes | default({}) | combine(volume_defs | default({})) }}"
-  loop: "{{ lookup('vars', *services) | zip(services) }}"
+    service_defs: |
+      {{
+        {
+          item.name: (item.service | combine({
+            'volumes': (service_mounts[item.name] | default([]))
+          }, list_merge='append'))
+        } | combine(service_defs | default({}))
+      }}
+    volume_defs: "{{ item.volumes | default({}) | combine(volume_defs | default({})) }}"
+  loop: "{{ service_specs }}"
   loop_control:
-    label: "{{ item.1 }}"
+    label: "{{ item.name }}"
 
 - name: Write docker compose spec
   vars:
     docker_compose_config:
-      version: "3.0"
+      version: "3.6"
       services: "{{ service_defs }}"
       volumes: "{{ volume_defs }}"
   copy:

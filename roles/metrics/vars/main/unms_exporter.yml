@@ -8,13 +8,9 @@ unms_exporter:
   service:
     image: ffddorf/unms-exporter:rewrite
     command: ["/usr/local/bin/unms-exporter", "-c", "/config.yml"]
-    volumes:
-      - type: bind
-        source: "{{ config_dir }}/unms_exporter.yml"
-        target: /config.yml
 
   files:
-    - dest: "{{ config_dir }}/unms_exporter.yml"
+    - dest: "/config.yml"
       content: "{{ unms_exporter_config | to_yaml }}"
 
   jobs:
