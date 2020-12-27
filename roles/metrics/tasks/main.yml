@@ -31,7 +31,7 @@
             'source': config_dir+'/files/'+(item.1.content | hash('sha1')),
             'target': item.1.dest
           }]
-        } | combine(service_mounts | default({}))
+        } | combine(service_mounts | default({}), list_merge='append')
       }}
     service_files: |
       {{
