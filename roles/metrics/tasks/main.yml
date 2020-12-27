@@ -1,0 +1,59 @@
+---
+- name: Install required packages
+  package:
+    name:
+      - docker.io
+      - docker-compose
+      - python3-pip
+    state: present
+
+- name: Install python wheels
+  pip:
+    name:
+      - docker
+      - docker-compose
+
+- name: Create config dir
+  file:
+    path: "{{ config_dir }}"
+    state: directory
+
+- name: Write files for services
+  copy:
+    dest: "{{ item.dest }}"
+    content: |
+      {{ ansible_managed | comment }}
+      {{ item.content }}
+  loop: "{{ lookup('vars', *services) | selectattr('files', 'defined') | map(attribute='files') | flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.dest }}"
+  notify: "Restart services"
+
+- name: Gather docker compose spec
+  set_fact:
+    service_defs: "{{ { item.1: item.0.service } | combine(service_defs | default({})) }}"
+    volume_defs: "{{ item.0.volumes | default({}) | combine(volume_defs | default({})) }}"
+  loop: "{{ lookup('vars', *services) | zip(services) }}"
+  loop_control:
+    label: "{{ item.1 }}"
+
+- name: Write docker compose spec
+  vars:
+    docker_compose_config:
+      version: "3.0"
+      services: "{{ service_defs }}"
+      volumes: "{{ volume_defs }}"
+  copy:
+    dest: "{{ config_dir }}/docker-compose.yml"
+    content: "{{ docker_compose_config | to_nice_yaml }}"
+    validate: "docker-compose -f %s config -q"
+  notify: "Apply docker-compose config"
+
+- name: Pull docker compose service images
+  community.docker.docker_compose:
+    project_src: "{{ config_dir }}"
+    project_name: "{{ docker_compose_project_name }}"
+    pull: true
+  tags:
+    - never
+    - upgrade

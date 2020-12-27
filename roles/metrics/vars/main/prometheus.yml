@@ -1,0 +1,22 @@
+# Compiles job definitions from different services
+services_except_prometheus: "{{ services | difference(['prometheus']) }}"
+prometheus_jobs: "{{ lookup('vars', *services_except_prometheus) | selectattr('jobs','defined') | map(attribute='jobs') | flatten | union(prometheus_jobs_extra) }}"
+
+prometheus_config:
+  scrape_configs: "{{ prometheus_jobs }}"
+
+prometheus:
+  service:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - "{{ config_dir }}/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "prometheus_data:/prometheus"
+
+  volumes:
+    prometheus_data: {}
+
+  files:
+    - dest: "{{ config_dir }}/prometheus.yml"
+      content: "{{ prometheus_config | to_yaml }}"

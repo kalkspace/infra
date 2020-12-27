@@ -1,0 +1,9 @@
+letsencrypt_email: admin@kalk.space
+
+prometheus_jobs: []
+
+ansible_managed: |-
+  DO NOT EDIT!
+  This file is managed by Ansible via the role `{{role_name}}`.
+
+docker_compose_project_name: "metrics"

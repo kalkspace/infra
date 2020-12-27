@@ -1,0 +1,14 @@
+---
+- name: Apply docker-compose config
+  community.docker.docker_compose:
+    project_src: "{{ config_dir }}"
+    project_name: "{{ docker_compose_project_name }}"
+    remove_orphans: true
+  when: not skip_handlers
+
+- name: "Restart services"
+  community.docker.docker_compose:
+    project_src: "{{ config_dir }}"
+    project_name: "{{ docker_compose_project_name }}"
+    restarted: true
+  when: not skip_handlers

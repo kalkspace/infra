@@ -1,0 +1,32 @@
+unms_exporter_host: "unms_exporter:9806"
+
+unms_exporter_config:
+  token:
+    "kalkspace.unmsapp.com": "{{ unms_exporter_token }}"
+
+unms_exporter:
+  service:
+    image: ffddorf/unms-exporter:rewrite
+    command: ["/usr/local/bin/unms-exporter", "-c", "/config.yml"]
+    volumes:
+      - "{{ config_dir }}/unms_exporter.yml:/config.yml"
+
+  files:
+    - dest: "{{ config_dir }}/unms_exporter.yml"
+      content: "{{ unms_exporter_config | to_yaml }}"
+
+  jobs:
+    - job_name: "unms_exporter"
+      metrics_path: /
+      static_configs:
+        - targets: "{{ scrape_targets.unms }}"
+      relabel_configs: "{{ unms_exporter_relabel }}"
+
+unms_exporter_relabel:
+  - target_label: instance
+    source_labels: [__address__]
+  - target_label: __param_target
+    source_labels: [__address__]
+  - target_label: __address__
+    # The unms exporter's real hostname:port.
+    replacement: "{{ unms_exporter_host }}"

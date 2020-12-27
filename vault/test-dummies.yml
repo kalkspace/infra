@@ -1,0 +1,3 @@
+# Override all vault-encrypted vars from `secrets.yml`
+bbb_metrics_token: "dummy-test-token"
+unms_exporter_token: "dummy-test-token"
