@@ -13,3 +13,7 @@ grafana:
 
   volumes:
     grafana_data: {}
+
+  files:
+    - dest: /etc/grafana/grafana.ini
+      content: "{{ lookup('template', 'grafana.ini.j2') }}"
