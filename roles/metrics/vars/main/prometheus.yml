@@ -8,12 +8,15 @@ prometheus_config:
 prometheus:
   service:
     image: prom/prometheus
-    ports:
-      - "9090:9090"
     volumes:
       - type: volume
         source: prometheus_data
         target: /prometheus
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.{{ base_domain }}`)"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.routers.prometheus.tls.certresolver=myresolver"
 
   volumes:
     prometheus_data: {}

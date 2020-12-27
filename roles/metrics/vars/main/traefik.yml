@@ -1,22 +1,53 @@
+traefik_config:
+  api:
+    dashboard: true
+
+  providers:
+    file:
+      filename: /etc/traefik/traefik-routing.yml
+
+    docker:
+      watch: true
+      exposedByDefault: false
+
+  entrypoints:
+    web:
+      address: ":80"
+      http:
+        redirections:
+          entrypoint:
+            to: websecure
+            scheme: https
+            permanent: true
+
+    websecure:
+      address: ":443"
+
+  certificatesResolvers:
+    myresolver:
+      acme:
+        httpchallenge:
+          entrypoint: web
+        email: "{{ letsencrypt_email }}"
+        # mounted volume
+        storage: /letsencrypt/acme.json
+
+traefik_routing:
+  http:
+    routers:
+      api:
+        rule: "Host(`traefik.{{ base_domain }}`)"
+        service: "api@internal"
+        entryPoints: [websecure]
+        tls:
+          certResolver: myresolver
+
 traefik:
   service:
     image: traefik
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.email={{ letsencrypt_email }}"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
     volumes:
       - type: volume
         source: letsencrypt_data
@@ -28,3 +59,9 @@ traefik:
 
   volumes:
     letsencrypt_data: {}
+
+  files:
+    - dest: /etc/traefik/traefik.yml
+      content: "{{ traefik_config | to_nice_yaml }}"
+    - dest: /etc/traefik/traefik-routing.yml
+      content: "{{ traefik_routing | to_nice_yaml }}"
