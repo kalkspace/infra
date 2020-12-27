@@ -7,3 +7,5 @@ ansible_managed: |-
   This file is managed by Ansible via the role `{{role_name}}`.
 
 docker_compose_project_name: "metrics"
+
+skip_handlers: false
