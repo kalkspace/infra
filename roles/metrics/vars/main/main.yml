@@ -1,4 +1,4 @@
-config_dir: "/var/services/config"
+config_dir: "/var/services"
 
 services:
   - traefik
