@@ -2,7 +2,9 @@ grafana:
   service:
     image: grafana/grafana
     volumes:
-      - "grafana_data:/var/lib/grafana"
+      - type: volume
+        source: grafana_data
+        target: /var/lib/grafana
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`metrics.kalk.space`)"

@@ -11,12 +11,13 @@ prometheus:
     ports:
       - "9090:9090"
     volumes:
-      - "{{ config_dir }}/prometheus.yml:/etc/prometheus/prometheus.yml"
-      - "prometheus_data:/prometheus"
+      - type: volume
+        source: prometheus_data
+        target: /prometheus
 
   volumes:
     prometheus_data: {}
 
   files:
-    - dest: "{{ config_dir }}/prometheus.yml"
+    - dest: "/etc/prometheus/prometheus.yml"
       content: "{{ prometheus_config | to_yaml }}"

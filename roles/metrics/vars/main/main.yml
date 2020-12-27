@@ -1,4 +1,4 @@
-config_dir: "/var/services/config"
+config_dir: "/var/services"
 
 services:
   - traefik
@@ -6,6 +6,9 @@ services:
   - grafana
   - blackbox_exporter
   - unms_exporter
+
+# Compile list of service specs
+service_specs: "{{ lookup('vars', *services) | add_prop_from_list('name', services) }}"
 
 scrape_targets:
   bbb:
