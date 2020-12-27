@@ -17,7 +17,9 @@ blackbox_exporter:
   service:
     image: prom/blackbox-exporter:master
     volumes:
-      - "{{ config_dir }}/blackbox_exporter.yml:/config.yml"
+      - type: bind
+        source: "{{ config_dir }}/blackbox_exporter.yml"
+        target: /config.yml
     command:
       - "--config.file=/config.yml"
 

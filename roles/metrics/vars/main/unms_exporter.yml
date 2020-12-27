@@ -9,7 +9,9 @@ unms_exporter:
     image: ffddorf/unms-exporter:rewrite
     command: ["/usr/local/bin/unms-exporter", "-c", "/config.yml"]
     volumes:
-      - "{{ config_dir }}/unms_exporter.yml:/config.yml"
+      - type: bind
+        source: "{{ config_dir }}/unms_exporter.yml"
+        target: /config.yml
 
   files:
     - dest: "{{ config_dir }}/unms_exporter.yml"
