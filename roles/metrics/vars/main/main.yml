@@ -21,6 +21,8 @@ scrape_targets:
     - https://discuss.kalk.space/srv/status
   unms:
     - kalkspace.unmsapp.com
+  stroma_streama:
+    - marcus.stromaproxy.kalk.space
 
 prometheus_jobs_extra:
   - job_name: bigbluebutton
@@ -31,3 +33,8 @@ prometheus_jobs_extra:
       password: "{{ bbb_metrics_token }}"
     static_configs:
       - targets: "{{ scrape_targets.bbb }}"
+  - job_name: stroma-streama
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: "{{ scrape_targets.stroma_streama }}"
