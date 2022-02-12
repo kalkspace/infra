@@ -6,7 +6,7 @@ unms_exporter_config:
 
 unms_exporter:
   service:
-    image: ffddorf/unms-exporter:rewrite
+    image: quay.io/ffddorf/unms-exporter:latest
     command: ["/usr/local/bin/unms-exporter", "-c", "/config.yml"]
 
   files:
