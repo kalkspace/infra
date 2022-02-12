@@ -104,3 +104,4 @@
   tags:
     - never
     - upgrade
+  notify: "Apply docker-compose config"
