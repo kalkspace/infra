@@ -102,7 +102,7 @@
           enable_ipv6: true
           ipam:
             config:
-              - subnet: fd00::/64
+              - subnet: fd00:0:0:1::/64
   copy:
     dest: "{{ config_dir }}/docker-compose.yml"
     content: "{{ docker_compose_config | to_nice_yaml }}"
