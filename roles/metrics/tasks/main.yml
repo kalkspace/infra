@@ -21,6 +21,13 @@
     - "{{ config_dir }}"
     - "{{ config_dir }}/files"
 
+- name: Create docker config
+  copy:
+    src: docker-daemon.json
+    dest: /etc/docker/daemon.json
+  notify:
+    - Reload docker
+
 - name: Prepare files for writing & mounting
   set_fact:
     service_mounts: |
@@ -90,6 +97,12 @@
       version: "3.6"
       services: "{{ service_defs }}"
       volumes: "{{ volume_defs }}"
+      networks:
+        default:
+          enable_ipv6: true
+          ipam:
+            config:
+              - subnet: fd00:0:0:1::/64
   copy:
     dest: "{{ config_dir }}/docker-compose.yml"
     content: "{{ docker_compose_config | to_nice_yaml }}"

@@ -5,3 +5,7 @@
     project_name: "{{ docker_compose_project_name }}"
     remove_orphans: true
   when: not skip_handlers
+- name: Reload docker
+  ansible.builtin.systemd:
+    name: docker.service
+    state: reloaded

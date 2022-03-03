@@ -8,6 +8,7 @@ services:
   - grafana
   - blackbox_exporter
   - unms_exporter
+  - ipv6nat
 
 # Compile list of service specs
 service_specs: "{{ lookup('vars', *services) | add_prop_from_list('name', services) }}"
@@ -23,6 +24,8 @@ scrape_targets:
     - kalkspace.unmsapp.com
   stroma_streama:
     - marcus.stromaproxy.kalk.space
+  getraenkekasse:
+    - getraenkekasse.kalk.space
 
 prometheus_jobs_extra:
   - job_name: bigbluebutton
@@ -38,3 +41,8 @@ prometheus_jobs_extra:
     metrics_path: /metrics
     static_configs:
       - targets: "{{ scrape_targets.stroma_streama }}"
+  - job_name: getraenkekasse
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: "{{ scrape_targets.getraenkekasse }}"

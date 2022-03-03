@@ -1,0 +1,9 @@
+ipv6nat:
+  service:
+    image: robbertkl/ipv6nat
+    privileged: true
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /lib/modules:/lib/modules:ro
