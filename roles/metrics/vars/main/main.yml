@@ -56,3 +56,7 @@ prometheus_jobs_extra:
       password: "{{ unpoller_password }}"
     static_configs:
       - targets: "{{ scrape_targets.unpoller }}"
+    metric_relabel_configs:
+    - source_labels: ['__name__']
+      regex: unifipoller_site_users
+      action: keep
