@@ -26,6 +26,8 @@ scrape_targets:
     - marcus.stromaproxy.kalk.space
   getraenkekasse:
     - getraenkekasse.kalk.space
+  unpoller:
+    - unpoller.k3s.kalk.space
 
 prometheus_jobs_extra:
   - job_name: bigbluebutton
@@ -46,3 +48,15 @@ prometheus_jobs_extra:
     metrics_path: /metrics
     static_configs:
       - targets: "{{ scrape_targets.getraenkekasse }}"
+  - job_name: unpoller
+    scheme: https
+    metrics_path: /metrics
+    basic_auth:
+      username: "metrics"
+      password: "{{ unpoller_password }}"
+    static_configs:
+      - targets: "{{ scrape_targets.unpoller }}"
+    metric_relabel_configs:
+    - source_labels: ['__name__']
+      regex: unifipoller_site_users
+      action: keep
