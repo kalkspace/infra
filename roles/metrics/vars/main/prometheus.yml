@@ -12,6 +12,15 @@ prometheus:
       - type: volume
         source: prometheus_data
         target: /prometheus
+    command:
+      # default arguments from here:
+      # https://registry.hub.docker.com/layers/prom/prometheus/latest/images/sha256-df60172c8d9f08cadae1d79bf86525b6426c47873c712ddf0a04ed424a8c1ad4?context=explore
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      # default retention time is only 15d :O
+      - "--storage.tsdb.retention.time=2y"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.{{ base_domain }}`)"
