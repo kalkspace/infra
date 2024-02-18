@@ -1,0 +1,59 @@
+unpoller_unifi_url: https://unifi.kalk.space
+unpoller_unifi_site: 19jfqm00
+
+unpoller_config: |
+  # See Github example page for more details.
+  # https://github.com/unpoller/unpoller/blob/master/examples/up.conf.example
+
+  [poller]
+    debug = false
+    quiet = false
+    plugins = []
+
+  [prometheus]
+    disable = false
+    http_listen = "0.0.0.0:9130"
+
+  [influxdb]
+    disable = true
+
+  # Loki is disabled with no URL
+  [loki]
+    url = ""
+
+  [datadog]
+    disable = true
+
+  [webserver]
+    enable = false
+    port   = 37288
+    html_path     = "/usr/lib/unifi-poller/web"
+
+  [unifi]
+    dynamic = false
+
+  [unifi.defaults]
+    url =  "{{ unpoller_unifi_url }}"
+    sites = ["{{ unpoller_unifi_site }}"]
+
+unpoller:
+  service:
+    image: ghcr.io/unpoller/unpoller:v2.9.5
+    environment:
+      UP_UNIFI_DEFAULT_USER: "{{ unpoller_unifi_user }}"
+      UP_UNIFI_DEFAULT_PASS: "{{ unpoller_unifi_pass }}"
+
+  files:
+    - dest: "/etc/unpoller/up.conf"
+      content: "{{ unpoller_config }}"
+
+  jobs:
+    - job_name: unpoller
+      scheme: http
+      metrics_path: /metrics
+      static_configs:
+        - targets: ["unpoller:9130"]
+      metric_relabel_configs:
+        - source_labels: ["__name__"]
+          regex: unpoller_site_users
+          action: keep
