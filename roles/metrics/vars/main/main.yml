@@ -21,6 +21,7 @@ scrape_targets:
     - gw1.kalk.space
   blackbox_http:
     - https://discuss.kalk.space/srv/status
+    - https://bbb.kalk.space/bigbluebutton/api
   unms:
     - kalkspace.unmsapp.com
   stroma_streama:
